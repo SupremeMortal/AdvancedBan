@@ -18,8 +18,8 @@ import java.util.UUID;
 public class CommandUtils {
     public Optional<Punishment> getPunishment(Object target, PunishmentType type) {
         return type == PunishmentType.MUTE
-                ? PunishmentManager.getInstance().getMute(target)
-                : PunishmentManager.getInstance().getInterimBan(target);
+                ? PunishmentManager.getInstance().getPunishment(target, type)
+                : PunishmentManager.getInstance().getPunishment(target, type);
     }
 
     // Removes name argument and returns uuid (null if failed)

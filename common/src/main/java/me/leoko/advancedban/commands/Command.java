@@ -246,8 +246,8 @@ public enum Command {
                 String ip = address.map(InetAddress::getHostAddress).orElse("none cashed");
 
                 String loc = address.flatMap(GeoLocation::getLocation).orElse("failed to fetch!");
-                Punishment mute = PunishmentManager.getInstance().getMute(uuid).orElse(null);
-                Punishment ban = PunishmentManager.getInstance().getInterimBan(uuid).orElse(null);
+                Punishment mute = PunishmentManager.getInstance().getPunishment(uuid, PunishmentType.MUTE).orElse(null);
+                Punishment ban = PunishmentManager.getInstance().getPunishment(uuid, PunishmentType.BAN).orElse(null);
 
                 AdvancedBanCommandSender sender = input.getSender();
 
