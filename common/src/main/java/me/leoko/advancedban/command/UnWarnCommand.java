@@ -10,9 +10,9 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.UUID;
 
-public class UnwarnCommand extends UnpunishmentTypeCommand {
+public class UnWarnCommand extends UnPunishmentTypeCommand {
 
-    public UnwarnCommand() {
+    public UnWarnCommand() {
         super(PunishmentType.WARNING);
     }
 

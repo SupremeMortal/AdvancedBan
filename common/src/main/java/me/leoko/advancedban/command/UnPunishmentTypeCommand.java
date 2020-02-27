@@ -1,17 +1,17 @@
 package me.leoko.advancedban.command;
 
-import me.leoko.advancedban.AdvancedBan;
 import me.leoko.advancedban.AdvancedBanCommandSender;
 import me.leoko.advancedban.punishment.Punishment;
 import me.leoko.advancedban.punishment.PunishmentType;
 import me.leoko.advancedban.utils.CommandUtils;
 
+import java.util.List;
 import java.util.Optional;
 
-public abstract class UnpunishmentTypeCommand extends PunishmentTypeCommand {
+public abstract class UnPunishmentTypeCommand extends PunishmentTypeCommand {
 
-    UnpunishmentTypeCommand(PunishmentType type, String... aliases) {
-        super(type, aliases);
+    UnPunishmentTypeCommand(PunishmentType type) {
+        super(type, type.getUnaliases());
     }
 
     @Override
@@ -24,9 +24,11 @@ public abstract class UnpunishmentTypeCommand extends PunishmentTypeCommand {
                 return true;
             }
 
-            Optional<Punishment> punishment = getPunishment(sender.getAdvancedBan(), identifier.get());
-            if (punishment.isPresent()) {
-                sender.getAdvancedBan().getPunishmentManager().deletePunishment(punishment.get(), true);
+            List<Punishment> punishments = sender.getAdvancedBan().getPunishmentManager().getPunishments(identifier.get(), getType(), true);
+            if (!punishments.isEmpty()) {
+                for (Punishment punishment : punishments) {
+                    sender.getAdvancedBan().getPunishmentManager().deletePunishment(punishment, true);
+                }
                 sender.sendCustomMessage(getConfigSection() + ".Done", true, "NAME", args[0]);
             } else {
                 sender.sendCustomMessage(getConfigSection() + ".NotPunished", true, "NAME", args[0]);
@@ -34,9 +36,5 @@ public abstract class UnpunishmentTypeCommand extends PunishmentTypeCommand {
             return true;
         }
         return false;
-    }
-
-    public Optional<Punishment> getPunishment(AdvancedBan advancedBan, Object identifier) {
-        throw new UnsupportedOperationException();
     }
 }

@@ -3,6 +3,7 @@ package me.leoko.advancedban.command;
 import me.leoko.advancedban.AdvancedBan;
 import me.leoko.advancedban.AdvancedBanCommandSender;
 import me.leoko.advancedban.punishment.Punishment;
+import me.leoko.advancedban.punishment.PunishmentType;
 import me.leoko.advancedban.utils.CommandUtils;
 import me.leoko.advancedban.utils.GeoLocation;
 
@@ -60,8 +61,8 @@ public class CheckCommand extends AbstractCommand {
         if (address.isPresent()) {
             location = GeoLocation.getLocation(address.get());
         }
-        Optional<Punishment> mute = sender.getAdvancedBan().getPunishmentManager().getMute(identifier);
-        Optional<Punishment> ban = sender.getAdvancedBan().getPunishmentManager().getInterimBan(identifier);
+        Optional<Punishment> mute = sender.getAdvancedBan().getPunishmentManager().getPunishment(identifier, PunishmentType.MUTE);
+        Optional<Punishment> ban = sender.getAdvancedBan().getPunishmentManager().getPunishment(identifier, PunishmentType.BAN);
 
         sender.sendCustomMessage("Check.Header", true, "NAME", punishment.map(Punishment::getName).orElse(args[0]));
         sender.sendCustomMessage("Check.UUID", false, "UUID", identifier instanceof UUID ? identifier : "N/A");

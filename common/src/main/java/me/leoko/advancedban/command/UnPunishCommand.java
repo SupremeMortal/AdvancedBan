@@ -7,9 +7,9 @@ import me.leoko.advancedban.utils.CommandUtils;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-public class UnpunishCommand extends AbstractCommand {
+public class UnPunishCommand extends AbstractCommand {
 
-    public UnpunishCommand() {
+    public UnPunishCommand() {
         super("unpunish", "ab.all", "UnPunish");
     }
 

@@ -70,7 +70,7 @@ public class PunishmentManager {
         return new InterimData(uuid, name, address, punishments, history);
     }
 
-    public Optional<Punishment> getInterimBan(@Nonnull InterimData data) {
+    public Optional<Punishment> getBan(@Nonnull InterimData data) {
         Objects.requireNonNull(data, "data");
         for (Punishment pt : data.getPunishments()) {
             if (pt.getType().getBasic() == PunishmentType.BAN && !isExpired(pt)) {
@@ -177,18 +177,17 @@ public class PunishmentManager {
         return pt == null || isExpired(pt) ? Optional.empty() : Optional.of(pt);
     }
 
-    public Optional<Punishment> getMute(Object object) {
-        List<Punishment> punishments = getPunishments(object, PunishmentType.MUTE, true);
-        return punishments.isEmpty() ? Optional.empty() : Optional.ofNullable(punishments.get(0));
+    public Optional<Punishment> getPunishment(Object object, PunishmentType type) {
+        return getPunishment(object, type, true);
     }
 
-    public Optional<Punishment> getInterimBan(Object object) {
-        List<Punishment> punishments = getPunishments(object, PunishmentType.BAN, true);
+    public Optional<Punishment> getPunishment(Object object, PunishmentType type, boolean current) {
+        List<Punishment> punishments = getPunishments(object, type, current);
         return punishments.isEmpty() ? Optional.empty() : Optional.ofNullable(punishments.get(0));
     }
 
     public boolean isMuted(Object object) {
-        return getMute(object).isPresent();
+        return getPunishment(object, PunishmentType.MUTE, true).isPresent();
     }
 
     public boolean isCached(Object name) {
@@ -223,7 +222,7 @@ public class PunishmentManager {
     }
 
     public boolean isBanned(Object object) {
-        return getInterimBan(object).isPresent();
+        return getPunishment(object, PunishmentType.BAN, true).isPresent();
     }
 
     public Set<Punishment> getLoadedPunishments(boolean checkExpired) {

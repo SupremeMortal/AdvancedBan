@@ -28,10 +28,10 @@ public class CommandManager {
         registerCommand(new TempIPBanCommand());
         registerCommand(new TempMuteCommand());
         registerCommand(new TempWarningCommand());
-        registerCommand(new UnbanCommand());
-        registerCommand(new UnmuteCommand());
-        registerCommand(new UnpunishCommand());
-        registerCommand(new UnwarnCommand());
+        registerCommand(new UnBanCommand());
+        registerCommand(new UnMuteCommand());
+        registerCommand(new UnPunishCommand());
+        registerCommand(new UnWarnCommand());
         registerCommand(new WarningCommand());
         registerCommand(new WarnsCommand());
     }

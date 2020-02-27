@@ -2,6 +2,7 @@ package me.leoko.advancedban.command;
 
 import me.leoko.advancedban.AdvancedBanCommandSender;
 import me.leoko.advancedban.punishment.Punishment;
+import me.leoko.advancedban.punishment.PunishmentType;
 import me.leoko.advancedban.utils.CommandUtils;
 
 import java.util.Optional;
@@ -29,9 +30,9 @@ public class ChangeReasonCommand extends AbstractCommand {
             }
 
             if (args[0].equalsIgnoreCase("ban")) {
-                punishment = sender.getAdvancedBan().getPunishmentManager().getInterimBan(identifier.get());
+                punishment = sender.getAdvancedBan().getPunishmentManager().getPunishment(identifier.get(), PunishmentType.BAN);
             } else {
-                punishment = sender.getAdvancedBan().getPunishmentManager().getMute(identifier.get());
+                punishment = sender.getAdvancedBan().getPunishmentManager().getPunishment(identifier.get(), PunishmentType.MUTE);
             }
         } else {
             return false;

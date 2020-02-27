@@ -144,12 +144,12 @@ public class BungeeAdvancedBan extends AdvancedBan {
 
     @Override
     public Optional<String> onPreLogin(String name, UUID uuid, InetAddress address) {
-        redisBungee.ifPresent(redisBungeeAPI -> {
+        if (redisBungee.isPresent()) {
             ByteBuf buf = Unpooled.buffer(32);
             RedisMessageUtils.writeConnectionMessage(buf, name, uuid, address);
             String payload = Base64.getEncoder().encodeToString(buf.array());
-            redisBungeeAPI.sendChannelMessage("AdvancedBan", payload);
-        });
+            redisBungee.get().sendChannelMessage("AdvancedBan", payload);
+        }
         return super.onPreLogin(name, uuid, address);
     }
 

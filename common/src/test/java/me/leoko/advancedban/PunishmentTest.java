@@ -38,7 +38,7 @@ public class PunishmentTest {
         AbstractCommand banCommand = advancedBan.getCommandManager().getCommand("ban").orElseThrow(() -> new AssertionError("Ban command was not found"));
         banCommand.execute(new TestCommandSender("UnitTest", advancedBan), new String[]{"Leoko", "Doing", "some", "unit-testing"});
         assertTrue(advancedBan.getPunishmentManager().isBanned("leoko"), "Punishment from above has failed");
-        assertEquals(advancedBan.getPunishmentManager().getInterimBan("leoko").orElseThrow(() -> new AssertionError("Ban does not exist"))
+        assertEquals(advancedBan.getPunishmentManager().getPunishment("leoko", PunishmentType.BAN).orElseThrow(() -> new AssertionError("Ban does not exist"))
                 .getReason().orElseThrow(() -> new AssertionError("Reason does not exist")), "Doing some unit-testing", "Reason should match");
     }
 

@@ -14,6 +14,7 @@ import me.leoko.advancedban.manager.*;
 import me.leoko.advancedban.punishment.InterimData;
 import me.leoko.advancedban.punishment.Punishment;
 import me.leoko.advancedban.punishment.PunishmentManager;
+import me.leoko.advancedban.punishment.PunishmentType;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -140,7 +141,7 @@ public abstract class AdvancedBan {
     public Optional<String> onPreLogin(String name, UUID uuid, InetAddress address) {
         InterimData interimData = punishmentManager.load(uuid, name, address);
 
-        Optional<Punishment> punishment = punishmentManager.getInterimBan(interimData);
+        Optional<Punishment> punishment = punishmentManager.getBan(interimData);
 
         if (!punishment.isPresent()) {
             punishmentManager.acceptData(interimData);
@@ -175,7 +176,7 @@ public abstract class AdvancedBan {
     }
 
     public boolean onChat(AdvancedBanPlayer player, String message) {
-        Optional<List<String>> layout = punishmentManager.getMute(player.getUniqueId())
+        Optional<List<String>> layout = punishmentManager.getPunishment(player.getUniqueId(), PunishmentType.MUTE)
                 .map(pun -> AdvancedBan.this.getPunishmentManager().getLayout(pun));
         if (layout.isPresent()) {
             layout.get().forEach(player::sendMessage);
@@ -185,7 +186,7 @@ public abstract class AdvancedBan {
     }
 
     public boolean onCommand(AdvancedBanPlayer player, String command) {
-        Optional<List<String>> layout = punishmentManager.getMute(player.getUniqueId())
+        Optional<List<String>> layout = punishmentManager.getPunishment(player.getUniqueId(), PunishmentType.MUTE)
                 .map(pun -> AdvancedBan.this.getPunishmentManager().getLayout(pun));
         if (layout.isPresent() && isMutedCommand(command)) {
             layout.get().forEach(player::sendMessage);
