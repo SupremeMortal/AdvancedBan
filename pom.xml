@@ -20,6 +20,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <lombok.version>1.18.0</lombok.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <junit.version>5.3.1</junit.version>
         <advancedban.name>AdvancedBan</advancedban.name>
@@ -40,7 +41,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.0</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

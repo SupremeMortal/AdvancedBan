@@ -2,6 +2,7 @@ package me.leoko.advancedban.nukkit;
 
 import cn.nukkit.Player;
 import cn.nukkit.plugin.PluginBase;
+import me.leoko.advancedban.AdvancedBanLogger;
 import me.leoko.advancedban.nukkit.listener.ConnectionListener;
 import me.leoko.advancedban.nukkit.listener.MessageListener;
 
@@ -22,7 +23,7 @@ public class NukkitAdvancedBanPlugin extends PluginBase {
             try {
                 advancedBan.onPreLogin(player.getName(), player.getUniqueId(), InetAddress.getByName(player.getAddress())).ifPresent(player::kick);
             } catch (UnknownHostException e) {
-                advancedBan.getLogger().warn("Error whilst resolving player's address");
+                AdvancedBanLogger.getInstance().warn("Error whilst resolving player's address");
             }
         }
     }

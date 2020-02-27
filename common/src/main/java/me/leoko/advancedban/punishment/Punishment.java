@@ -3,6 +3,7 @@ package me.leoko.advancedban.punishment;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Setter;
+import me.leoko.advancedban.manager.TimeManager;
 
 import javax.annotation.Nonnull;
 import java.net.InetAddress;
@@ -43,7 +44,10 @@ public class Punishment {
 
     public Optional<String> getReason() {
         return Optional.ofNullable(reason);
-        //return (reason == null ? advancedBan.getConfiguration().getDefaultReason() : reason).replaceAll("'", "");
+    }
+
+    public boolean isExpired(){
+        return getType().isTemp() && getEnd() <= TimeManager.getTime();
     }
 
     public OptionalInt getId() {

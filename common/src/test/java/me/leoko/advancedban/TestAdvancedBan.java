@@ -1,6 +1,5 @@
 package me.leoko.advancedban;
 
-import me.leoko.advancedban.command.AbstractCommand;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.leoko.advancedban.punishment.Punishment;
 
@@ -26,12 +25,6 @@ public class TestAdvancedBan extends AdvancedBan {
     }
 
     @Override
-    protected void onRegisterCommand(AbstractCommand command) {
-        assertNotNull(command, "Command was null");
-        //Command executors are not being registered for testing
-    }
-
-    @Override
     protected void log(Level level, String msg) {
         assertNotNull(level, "Log level was null");
         assertNotNull(msg, "Message was null");
@@ -41,6 +34,11 @@ public class TestAdvancedBan extends AdvancedBan {
     @Override
     public String getVersion() {
         return "TEST";
+    }
+
+    @Override
+    public void registerCommand(String commandName) {
+
     }
 
     @Override

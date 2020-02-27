@@ -1,9 +1,8 @@
 package me.leoko.advancedban;
 
+import me.leoko.advancedban.manager.MessageManager;
+
 public interface AdvancedBanCommandSender {
-
-    AdvancedBan getAdvancedBan();
-
     String getName();
 
     void sendMessage(String message);
@@ -17,7 +16,7 @@ public interface AdvancedBanCommandSender {
     }
 
     default void sendCustomMessage(String path, boolean prefix, Object... parameters) {
-        getAdvancedBan().getMessageManager().sendMessage(this, path, prefix, parameters);
+        MessageManager.sendMessage(this, path, prefix, parameters);
     }
 
     boolean executeCommand(String command);

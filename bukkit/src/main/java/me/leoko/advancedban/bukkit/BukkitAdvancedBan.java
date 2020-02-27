@@ -4,9 +4,9 @@ import me.leoko.advancedban.AdvancedBan;
 import me.leoko.advancedban.AdvancedBanPlayer;
 import me.leoko.advancedban.bukkit.event.PunishmentEvent;
 import me.leoko.advancedban.bukkit.event.RevokePunishmentEvent;
-import me.leoko.advancedban.command.AbstractCommand;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.leoko.advancedban.punishment.Punishment;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
@@ -14,7 +14,6 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,10 +46,15 @@ public class BukkitAdvancedBan extends AdvancedBan {
     public Collection<AdvancedBanPlayer> getOnlinePlayers() {
         for (Player player : getServer().getOnlinePlayers()) {
             if (!getPlayer(player.getUniqueId()).isPresent()) {
-                registerPlayer(new BukkitAdvancedBanPlayer(player, this));
+                registerPlayer(new BukkitAdvancedBanPlayer(player));
             }
         }
         return super.getOnlinePlayers();
+    }
+
+    @Override
+    public void logToConsoleSender(String message) {
+        Bukkit.getServer().getConsoleSender().sendMessage(message);
     }
 
     @Override
@@ -103,23 +107,15 @@ public class BukkitAdvancedBan extends AdvancedBan {
     }
 
     @Override
-    public boolean isAdvancedBanCommand(String command) {
-        command = command.substring(1); // Remove forward slash
-        return super.isAdvancedBanCommand(command);
-    }
-
-    @Override
     public boolean isMutedCommand(String command) {
         command = command.substring(1); // Remove forward slash
         return super.isMutedCommand(command);
     }
 
     @Override
-    protected void onRegisterCommand(AbstractCommand command) {
-        PluginCommand pluginCommand = plugin.getCommand(command.getName());
-
-        pluginCommand.setExecutor(new AdvancedBanCommandExecutor(command, this));
-        pluginCommand.setAliases(Arrays.asList(command.getAliases()));
+    public void registerCommand(String command) {
+        PluginCommand pluginCommand = plugin.getCommand(command);
+        pluginCommand.setExecutor(new AdvancedBanCommandExecutor());
     }
 
     @Override

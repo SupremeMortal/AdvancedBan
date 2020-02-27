@@ -1,21 +1,20 @@
 package me.leoko.advancedban.manager;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.UtilityClass;
 import me.leoko.advancedban.AdvancedBan;
+import org.omg.PortableServer.AdapterActivator;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Created by Leoko @ dev.skamps.eu on 12.07.2016.
- */
-@RequiredArgsConstructor
+@UtilityClass
 public class TimeManager {
-    private final AdvancedBan advancedBan;
-
     public long getTime() {
-        return System.currentTimeMillis() + TimeUnit.HOURS.toMillis(advancedBan.getConfiguration().getTimeDifferential());
+        return System.currentTimeMillis() + TimeUnit.HOURS.toMillis(AdvancedBan.get().getConfiguration().getTimeDifferential());
     }
 
     public long toMilliSec(String s) {
@@ -43,7 +42,7 @@ public class TimeManager {
     }
 
     public String getDate(long date) {
-        SimpleDateFormat format = new SimpleDateFormat(advancedBan.getConfiguration().getDateFormat());
+        SimpleDateFormat format = new SimpleDateFormat(AdvancedBan.get().getConfiguration().getDateFormat());
         return format.format(new Date(date));
     }
 }

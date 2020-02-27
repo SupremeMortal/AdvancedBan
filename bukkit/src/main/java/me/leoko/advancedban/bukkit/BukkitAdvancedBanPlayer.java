@@ -10,8 +10,8 @@ import java.util.UUID;
 public class BukkitAdvancedBanPlayer extends BukkitAdvancedBanCommandSender implements AdvancedBanPlayer {
     private final Player player;
 
-    public BukkitAdvancedBanPlayer(Player player, AdvancedBan advancedBan) {
-        super(player, advancedBan);
+    public BukkitAdvancedBanPlayer(Player player) {
+        super(player);
         this.player = player;
     }
 

@@ -29,6 +29,6 @@ public class ConnectionListener implements Listener {
 
     @EventHandler
     public void onJoin(final PlayerJoinEvent event) {
-        advancedBan.runAsyncTask(() -> advancedBan.onLogin(new BukkitAdvancedBanPlayer(event.getPlayer(), advancedBan)));
+        advancedBan.runAsyncTask(() -> advancedBan.onLogin(new BukkitAdvancedBanPlayer(event.getPlayer())));
     }
 }

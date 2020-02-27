@@ -5,12 +5,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class TestCommandSender implements AdvancedBanCommandSender {
     private final String name;
-    private final AdvancedBan advancedBan;
-
-    @Override
-    public AdvancedBan getAdvancedBan() {
-        return advancedBan;
-    }
 
     @Override
     public String getName() {

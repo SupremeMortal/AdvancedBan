@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import me.leoko.advancedban.bungee.BungeeAdvancedBanPlayer;
 import me.leoko.advancedban.bungee.BungeeAdvancedBanPlugin;
 import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.event.LoginEvent;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PostLoginEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
@@ -20,7 +20,7 @@ public class ConnectionListener implements Listener {
     private final BungeeAdvancedBanPlugin plugin;
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onConnect(PreLoginEvent event) {
+    public void onConnect(LoginEvent event) {
         event.registerIntent(plugin);
         plugin.getAdvancedBan().runAsyncTask(() -> {
             plugin.getAdvancedBan().onPreLogin(event.getConnection().getName(), event.getConnection().getUniqueId(),
@@ -42,7 +42,6 @@ public class ConnectionListener implements Listener {
     @EventHandler
     public void onLogin(final PostLoginEvent event) {
         plugin.getAdvancedBan().runAsyncTask(() ->
-                plugin.getAdvancedBan().onLogin(new BungeeAdvancedBanPlayer(event.getPlayer(), plugin.getAdvancedBan(),
-                        plugin.getProxy())));
+                plugin.getAdvancedBan().onLogin(new BungeeAdvancedBanPlayer(event.getPlayer())));
     }
 }

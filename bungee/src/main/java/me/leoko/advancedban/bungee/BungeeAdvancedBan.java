@@ -8,7 +8,6 @@ import me.leoko.advancedban.AdvancedBan;
 import me.leoko.advancedban.AdvancedBanPlayer;
 import me.leoko.advancedban.bungee.event.PunishmentEvent;
 import me.leoko.advancedban.bungee.event.RevokePunishmentEvent;
-import me.leoko.advancedban.command.AbstractCommand;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.leoko.advancedban.punishment.Punishment;
 import net.md_5.bungee.api.CommandSender;
@@ -41,6 +40,11 @@ public class BungeeAdvancedBan extends AdvancedBan {
     }
 
     @Override
+    public void registerCommand(String commandName) {
+        getProxy().getPluginManager().registerCommand(plugin, new BungeeAdvancedBanCommand(commandName));
+    }
+
+    @Override
     public void executeCommand(String command) {
         CommandSender sender = getProxy().getConsole();
         getProxy().getPluginManager().dispatchCommand(sender, command);
@@ -50,7 +54,7 @@ public class BungeeAdvancedBan extends AdvancedBan {
     public Collection<AdvancedBanPlayer> getOnlinePlayers() {
         for (ProxiedPlayer player : plugin.getProxy().getPlayers()) {
             if (!getPlayer(player.getUniqueId()).isPresent()) {
-                registerPlayer(new BungeeAdvancedBanPlayer(player, this, getProxy()));
+                registerPlayer(new BungeeAdvancedBanPlayer(player));
             }
         }
         return super.getOnlinePlayers();
@@ -154,21 +158,12 @@ public class BungeeAdvancedBan extends AdvancedBan {
     }
 
     @Override
-    public boolean isAdvancedBanCommand(String command) {
-        command = command.substring(1); // Remove forward slash
-        return super.isAdvancedBanCommand(command);
-    }
-
-    @Override
     public boolean isMutedCommand(String command) {
         command = command.substring(1); // Remove forward slash
         return super.isMutedCommand(command);
     }
 
-    @Override
-    protected void onRegisterCommand(AbstractCommand command) {
-        getProxy().getPluginManager().registerCommand(plugin, new BungeeAdvancedBanCommand(command, this));
-    }
+
 
     @Override
     public boolean isUnitTesting() {

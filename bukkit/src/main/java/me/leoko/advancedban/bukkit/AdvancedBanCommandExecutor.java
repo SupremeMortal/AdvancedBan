@@ -1,30 +1,21 @@
 package me.leoko.advancedban.bukkit;
 
-import lombok.RequiredArgsConstructor;
-import me.leoko.advancedban.AdvancedBan;
 import me.leoko.advancedban.AdvancedBanCommandSender;
-import me.leoko.advancedban.command.AbstractCommand;
+import me.leoko.advancedban.manager.CommandManager;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
-@RequiredArgsConstructor
 public class AdvancedBanCommandExecutor implements CommandExecutor {
-    private final AbstractCommand command;
-    private final AdvancedBan advancedBan;
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        AdvancedBanCommandSender advancedBanCommandSender;
-        if (sender instanceof Player) {
-            advancedBanCommandSender = advancedBan.getPlayer(((Player) sender).getUniqueId())
-                    .orElseThrow(() -> new IllegalStateException("Player is not registered within AdvancedBan"));
-        } else {
-            advancedBanCommandSender = new BukkitAdvancedBanCommandSender(sender, advancedBan);
-        }
+        // Automatic case correction for player names
+        if (args.length > 0)
+            args[0] = (Bukkit.getPlayer(args[0]) != null ? Bukkit.getPlayer(args[0]).getName() : args[0]);
 
-        this.command.execute(advancedBanCommandSender, args);
+        final AdvancedBanCommandSender commandSender = new BukkitAdvancedBanCommandSender(sender);
+        CommandManager.getInstance().processCommand(commandSender, command.getName(), args);
         return true;
     }
 }

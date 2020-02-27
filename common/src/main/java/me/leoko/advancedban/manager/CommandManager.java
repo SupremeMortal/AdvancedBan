@@ -1,47 +1,53 @@
 package me.leoko.advancedban.manager;
 
-import lombok.RequiredArgsConstructor;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import me.leoko.advancedban.AdvancedBan;
-import me.leoko.advancedban.command.*;
+import me.leoko.advancedban.AdvancedBanCommandSender;
+import me.leoko.advancedban.commands.Command;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CommandManager {
-    private final Map<String, AbstractCommand> registeredCommands = new HashMap<>();
-    private final AdvancedBan advancedBan;
+    private final Set<String> activeCommands = new HashSet<>();
+
+    @Getter
+    private static final CommandManager instance = new CommandManager();
 
     public void onEnable() {
-        registerCommand(new AdvancedBanCommand());
-        registerCommand(new BanCommand());
-        registerCommand(new BanlistCommand());
-        registerCommand(new ChangeReasonCommand());
-        registerCommand(new CheckCommand());
-        registerCommand(new HistoryCommand());
-        registerCommand(new IPBanCommand());
-        registerCommand(new KickCommand());
-        registerCommand(new MuteCommand());
-        registerCommand(new SystemPreferencesCommand());
-        registerCommand(new TempBanCommand());
-        registerCommand(new TempIPBanCommand());
-        registerCommand(new TempMuteCommand());
-        registerCommand(new TempWarningCommand());
-        registerCommand(new UnBanCommand());
-        registerCommand(new UnMuteCommand());
-        registerCommand(new UnPunishCommand());
-        registerCommand(new UnWarnCommand());
-        registerCommand(new WarningCommand());
-        registerCommand(new WarnsCommand());
+        for (Command command : Command.values()) {
+            Collections.addAll(activeCommands, command.getNames());
+            AdvancedBan.get().registerCommand(command.getNames()[0]);
+        }
     }
 
-    private void registerCommand(AbstractCommand command) {
-        registeredCommands.put(command.getName(), command);
-        advancedBan.registerCommand(command);
+    public boolean isAdvancedBanCommand(String name){
+        return activeCommands.contains(name.toLowerCase());
     }
 
-    public Optional<AbstractCommand> getCommand(String command) {
-        return Optional.ofNullable(registeredCommands.get(command));
+    public void processCommand(AdvancedBanCommandSender commandSender, String commandName, String[] args) {
+        AdvancedBan.get().runAsyncTask(() -> {
+            Command command = Command.getByName(commandName);
+            if (command == null)
+                return;
+
+            String permission = command.getPermission();
+            if (permission != null && !commandSender.hasPermission(permission)) {
+                commandSender.sendCustomMessage("General.NoPerms", true);
+                return;
+            }
+
+            if (!command.validateArguments(args)) {
+                commandSender.sendCustomMessage(command.getUsagePath(), true);
+                return;
+            }
+
+            command.execute(commandSender, args);
+        });
     }
 }

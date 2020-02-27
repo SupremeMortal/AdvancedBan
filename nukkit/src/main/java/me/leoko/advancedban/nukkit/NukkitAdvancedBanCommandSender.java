@@ -2,18 +2,11 @@ package me.leoko.advancedban.nukkit;
 
 import cn.nukkit.command.CommandSender;
 import lombok.RequiredArgsConstructor;
-import me.leoko.advancedban.AdvancedBan;
 import me.leoko.advancedban.AdvancedBanCommandSender;
 
 @RequiredArgsConstructor
 public class NukkitAdvancedBanCommandSender implements AdvancedBanCommandSender {
     private final CommandSender sender;
-    private final AdvancedBan advancedBan;
-
-    @Override
-    public AdvancedBan getAdvancedBan() {
-        return advancedBan;
-    }
 
     @Override
     public String getName() {

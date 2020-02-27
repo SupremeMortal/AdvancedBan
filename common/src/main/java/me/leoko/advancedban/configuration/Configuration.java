@@ -20,6 +20,10 @@ public class Configuration {
 
     @JsonProperty("UseMySQL")
     private boolean usingMySQL = false;
+    @JsonProperty("DetailedEnableMessage")
+    private boolean detailedEnableMessage = true;
+    @JsonProperty("DetailedDisableMessage")
+    private boolean detailedDisableMessage = true;
     @JsonProperty("VerboseLogging")
     private boolean verboseLogging = false;
     @JsonProperty("DefaultReason")

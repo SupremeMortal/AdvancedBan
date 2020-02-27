@@ -8,12 +8,6 @@ import org.bukkit.command.CommandSender;
 @RequiredArgsConstructor
 public class BukkitAdvancedBanCommandSender implements AdvancedBanCommandSender {
     private final CommandSender sender;
-    private final AdvancedBan advancedBan;
-
-    @Override
-    public AdvancedBan getAdvancedBan() {
-        return advancedBan;
-    }
 
     @Override
     public String getName() {

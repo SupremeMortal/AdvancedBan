@@ -124,16 +124,19 @@ UnBan:
   Usage: "&cUsage &8\xbb &7&o/unban [Name/IP]"
   NotPunished: "&c&o%NAME% is not banned!"
   Done: "&a&o%NAME% &7was successfully unbanned!"
+  Notification: "&e&o%OPERATOR% &7unbanned &c&o%NAME%"
 
 UnMute:
   Usage: "&cUsage &8\xbb &7&o/unmute [Name]"
   NotPunished: "&c&o%NAME% is not muted!"
   Done: "&a&o%NAME% &7was successfully unmuted!"
+  Notification: "&e&o%OPERATOR% &7unmuted &c&o%NAME%"
 
 UnWarn:
   Usage: "&cUsage &8\xbb &7&o/unwarn [ID] or /unwarn clear [Name]"
   NotFound: "&cCould not find warning #%ID%"
   Done: "&7Warn &a&o#%ID% &7was successfully deleted!"
+  Notification: "&e&o%OPERATOR% &7unwarned &c&o%NAME%"
   Clear:
     Empty: "&c&o%NAME% &7has no warnings!"
     Done: "&7Cleared &a&o%COUNT% &7warnings"

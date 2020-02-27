@@ -11,7 +11,6 @@ public class BukkitAdvancedBanPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
-
         advancedBan.onEnable();
         getServer().getPluginManager().registerEvents(new ConnectionListener(advancedBan), this);
         getServer().getPluginManager().registerEvents(new MessageListener(advancedBan), this);

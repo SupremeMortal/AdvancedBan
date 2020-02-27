@@ -6,7 +6,6 @@ import cn.nukkit.Server;
 import cn.nukkit.command.CommandSender;
 import me.leoko.advancedban.AdvancedBan;
 import me.leoko.advancedban.AdvancedBanPlayer;
-import me.leoko.advancedban.command.AbstractCommand;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.leoko.advancedban.nukkit.event.PunishmentEvent;
 import me.leoko.advancedban.nukkit.event.RevokePunishmentEvent;
@@ -29,6 +28,11 @@ public class NukkitAdvancedBan extends AdvancedBan {
     @Override
     public String getVersion() {
         return plugin.getDescription().getVersion();
+    }
+
+    @Override
+    public void registerCommand(String commandName) {
+        getServer().getCommandMap().register("advancedban", new NukkitAdvancedBanCommand(commandName));
     }
 
     @Override
@@ -101,20 +105,9 @@ public class NukkitAdvancedBan extends AdvancedBan {
     }
 
     @Override
-    public boolean isAdvancedBanCommand(String command) {
-        command = command.substring(1); // Remove forward slash
-        return super.isAdvancedBanCommand(command);
-    }
-
-    @Override
     public boolean isMutedCommand(String command) {
         command = command.substring(1); // Remove forward slash
         return super.isMutedCommand(command);
-    }
-
-    @Override
-    protected void onRegisterCommand(AbstractCommand command) {
-        getServer().getCommandMap().register("advancedban", new NukkitAdvancedBanCommand(command, this));
     }
 
     @Override

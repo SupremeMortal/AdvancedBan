@@ -1,23 +1,31 @@
 package me.leoko.advancedban.manager;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import me.leoko.advancedban.AdvancedBan;
+import me.leoko.advancedban.AdvancedBanLogger;
 import me.leoko.advancedban.configuration.MySQLConfiguration;
 import me.leoko.advancedban.utils.SQLQuery;
 
 import java.sql.*;
 import java.util.Optional;
+import java.util.UUID;
 
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DatabaseManager {
-    private final AdvancedBan advancedBan;
+
+    @Getter
+    private static final DatabaseManager instance = new DatabaseManager();
+
+    private static final AdvancedBanLogger logger = AdvancedBanLogger.getInstance();
     private MySQLConfiguration.MySQL configuration;
     private Connection connection;
     private boolean failedMySQL = false;
     private boolean useMySQL;
 
     public void onEnable() {
-        Optional<MySQLConfiguration> config = advancedBan.getMySQLConfiguration();
+        Optional<MySQLConfiguration> config = AdvancedBan.get().getMySQLConfiguration();
         config.ifPresent(mySQLConfiguration -> {
             this.configuration = mySQLConfiguration.getMySQL();
             connectMySQLServer();
@@ -29,15 +37,15 @@ public class DatabaseManager {
             try {
                 Class.forName("org.hsqldb.jdbc.JDBCDriver");
             } catch (ClassNotFoundException ex) {
-                advancedBan.getLogger().info("§cERROR: failed to load HSQLDB JDBC driver.");
-                advancedBan.getLogger().logException(ex);
+                logger.info("§cERROR: failed to load HSQLDB JDBC driver.");
+                logger.logException(ex);
                 return;
             }
             try {
-                connection = DriverManager.getConnection("jdbc:hsqldb:file:" + advancedBan.getDataFolderPath() +
+                connection = DriverManager.getConnection("jdbc:hsqldb:file:" + AdvancedBan.get().getDataFolderPath() +
                         "/data/storage;hsqldb.lock_file=false", "SA", "");
             } catch (SQLException ex) {
-                advancedBan.getLogger().info("Could not connect to HSQLDB-Server!");
+                logger.info("Could not connect to HSQLDB-Server!");
             }
         }
 
@@ -50,17 +58,17 @@ public class DatabaseManager {
             try (PreparedStatement statement = connection.prepareStatement("SHUTDOWN")) {
                 statement.execute();
             } catch (SQLException ex) {
-                advancedBan.getLogger().warn("An unexpected error has occurred turning off the database");
-                advancedBan.getLogger().logException(ex);
+                logger.warn("An unexpected error has occurred turning off the database");
+                logger.logException(ex);
             }
         }
         try {
             connection.close();
         } catch (SQLException e) {
-            advancedBan.getLogger().warn(
+            logger.warn(
                     "Unable to close database connection\n" +
                             "Check logs for more info");
-            advancedBan.getLogger().logException(e);
+            logger.logException(e);
         }
     }
 
@@ -71,7 +79,7 @@ public class DatabaseManager {
                             "?verifyServerCertificate=false&useSSL=false&autoReconnect=true&useUnicode=true&characterEncoding=utf8",
                     configuration.getUsername(), configuration.getPassword());
         } catch (SQLException exc) {
-            advancedBan.getLogger().warn("Could not connect to MySQL-Server!");
+            logger.warn("Could not connect to MySQL-Server!");
             failedMySQL = true;
         }
     }
@@ -96,6 +104,8 @@ public class DatabaseManager {
                     statement.setInt(i + 1, (Integer) param);
                 } else if (param instanceof String) {
                     statement.setString(i + 1, (String) param);
+                } else if (param instanceof UUID) {
+                    statement.setString(i + 1, param.toString());
                 } else if (param instanceof Long) {
                     statement.setLong(i + 1, (Long) param);
                 } else {
@@ -110,13 +120,13 @@ public class DatabaseManager {
             }
             return null;
         } catch (SQLException ex) {
-            advancedBan.getLogger().warn(
+            logger.warn(
                     "An unexpected error has occurred executing an Statement in the database\n"
                             + "Please check the plugins/AdvancedBan/logs/latest.log file and report this\n"
                     + "error in: https://github.com/DevLeoko/AdvancedBan/issues"
             );
-            advancedBan.getLogger().debug("Query: \n" + sql);
-            advancedBan.getLogger().logException(ex);
+            logger.debug("Query: \n" + sql);
+            logger.logException(ex);
             return null;
         }
     }
@@ -125,8 +135,8 @@ public class DatabaseManager {
         try {
             return connection.isValid(timeout);
         } catch (SQLException ex) {
-            advancedBan.getLogger().warn("An unexpected error has occurred with the database.");
-            advancedBan.getLogger().logException(ex);
+            logger.warn("An unexpected error has occurred with the database.");
+            logger.logException(ex);
             return false;
         }
     }

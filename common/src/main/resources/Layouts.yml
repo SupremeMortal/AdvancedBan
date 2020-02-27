@@ -17,7 +17,7 @@ Message:
     - '%PREFIX% &7Banned for Hacking'
     - '&c&oBanned by %OPERATOR%'
     - "&cIt seems like you are using a"
-    - "&cracked client please disable it!"
+    - "&chacked client please disable it!"
     - "&cUnban in &8\xbb &7%DURATION%"
 
 # You would use this time-layout for example like this: "/tempban Leoko #ExampleLayout Hacking in FFA"

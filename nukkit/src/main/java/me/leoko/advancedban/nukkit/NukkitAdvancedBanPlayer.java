@@ -14,7 +14,7 @@ public class NukkitAdvancedBanPlayer extends NukkitAdvancedBanCommandSender impl
     private final InetSocketAddress address;
 
     public NukkitAdvancedBanPlayer(Player player, AdvancedBan advancedBan) {
-        super(player, advancedBan);
+        super(player);
         this.player = player;
         this.address = new InetSocketAddress(player.getAddress(), player.getPort());
     }

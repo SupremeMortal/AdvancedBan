@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import lombok.AccessLevel;
 import lombok.Getter;
-import me.leoko.advancedban.command.AbstractCommand;
 import me.leoko.advancedban.configuration.Configuration;
 import me.leoko.advancedban.configuration.Layouts;
 import me.leoko.advancedban.configuration.Messages;
@@ -20,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -43,14 +43,6 @@ public abstract class AdvancedBan {
     private final Map<Object, InetAddress> addresses = Collections.synchronizedMap(new HashMap<>());
     private final UUIDManager.FetcherMode mode;
     private final boolean mojangAuthed;
-    private final CommandManager commandManager = new CommandManager(this);
-    private final PunishmentManager punishmentManager = new PunishmentManager(this);
-    private final DatabaseManager databaseManager = new DatabaseManager(this);
-    private final UUIDManager uuidManager = new UUIDManager(this);
-    private final MessageManager messageManager = new MessageManager(this);
-    private final TimeManager timeManager = new TimeManager(this);
-    private final UpdateManager updateManager = new UpdateManager(this);
-    private final AdvancedBanLogger logger = new AdvancedBanLogger(this);
     private final Set<String> commands = new HashSet<>();
     private Configuration configuration;
     private Layouts layouts;
@@ -62,6 +54,7 @@ public abstract class AdvancedBan {
         if (instance != null) {
             throw new IllegalStateException("AdvancedBan has already been initialized");
         }
+
         instance = this;
         this.mode = mode;
         this.mojangAuthed = mojangAuthed;
@@ -77,16 +70,87 @@ public abstract class AdvancedBan {
         } catch (IOException e) {
             throw new IllegalStateException("Unable to load configuration files", e);
         }
-        logger.onEnable();
-        databaseManager.onEnable();
-        updateManager.onEnable();
-        uuidManager.onEnable();
-        punishmentManager.onEnable();
-        commandManager.onEnable();
+
+        AdvancedBanLogger.getInstance().onEnable();
+        DatabaseManager.getInstance().onEnable();
+        boolean changes = UpdateManager.migrateFiles();
+        UUIDManager.getInstance().onEnable();
+        PunishmentManager.getInstance().onEnable();
+        CommandManager.getInstance().onEnable();
+
+        if(changes){
+            try {
+                loadFiles();
+            } catch (IOException e) {
+                throw new IllegalStateException("Unable to load configuration files", e);
+            }
+        }
+
+
+        String upt = "You have the newest version";
+        String currentVersion = requestCurrentVersion();
+        if (currentVersion == null) {
+            upt = "Failed to check for updates :(";
+        } else if (!getVersion().startsWith(currentVersion)) {
+            upt = "There is a new version available! [" + currentVersion + "]";
+        }
+
+        if (getConfiguration().isDetailedEnableMessage()) {
+            logToConsoleSender("\n \n§8[]=====[§7Enabling AdvancedBan§8]=====[]"
+                    + "\n§8| §cInformation:"
+                    + "\n§8|   §cName: §7AdvancedBan"
+                    + "\n§8|   §cDeveloper: §7Leoko"
+                    + "\n§8|   §cVersion: §7" + getVersion()
+                    + "\n§8|   §cStorage: §7" + (DatabaseManager.getInstance().isUseMySQL() ? "MySQL (external)" : "HSQLDB (local)")
+                    + "\n§8| §cSupport:"
+                    + "\n§8|   §cGithub: §7https://github.com/DevLeoko/AdvancedBan/issues"
+                    + "\n§8|   §cDiscord: §7https://discord.gg/ycDG6rS"
+                    + "\n§8| §cUpdate:"
+                    + "\n§8|   §7" + upt
+                    + "\n§8[]================================[]§r\n ");
+        } else {
+            logToConsoleSender("§cEnabling AdvancedBan on Version §7" + getVersion());
+            logToConsoleSender("§7§o"+upt);
+        }
     }
 
     public final void onDisable() {
-        databaseManager.onDisable();
+        DatabaseManager.getInstance().onDisable();
+
+        if (getConfiguration().isDetailedDisableMessage()) {
+            logToConsoleSender("\n \n§8[]=====[§7Disabling  AdvancedBan§8]=====[]"
+                    + "\n§8| §cInformation:"
+                    + "\n§8|   §cName: §7AdvancedBan"
+                    + "\n§8|   §cDeveloper: §7Leoko"
+                    + "\n§8|   §cVersion: §7" + getVersion()
+                    + "\n§8|   §cStorage: §7" + (DatabaseManager.getInstance().isUseMySQL() ? "MySQL (external)" : "HSQLDB (local)")
+                    + "\n§8| §cSupport:"
+                    + "\n§8|   §cGithub: §7https://github.com/DevLeoko/AdvancedBan/issues"
+                    + "\n§8|   §cDiscord: §7https://discord.gg/ycDG6rS"
+                    + "\n§8[]================================[]§r\n ");
+        } else {
+            logToConsoleSender("§cDisabling AdvancedBan on Version §7" + getVersion());
+        }
+    }
+
+    private static String requestCurrentVersion(){
+        String response = null;
+        try {
+            InputStream versionStream = new URL("https://api.spigotmc.org/legacy/update.php?resource=8695").openStream();
+            Scanner s = new Scanner(versionStream);
+            if (s.hasNext())
+                response = s.next();
+            s.close();
+            versionStream.close();
+
+        } catch (IOException exc) {
+            AdvancedBanLogger.getInstance().logException(exc);
+        }
+        return response;
+    }
+
+    public void logToConsoleSender(String message){
+        AdvancedBanLogger.getInstance().info(message);
     }
 
     public final void loadFiles() throws IOException {
@@ -139,17 +203,17 @@ public abstract class AdvancedBan {
     }
 
     public Optional<String> onPreLogin(String name, UUID uuid, InetAddress address) {
-        InterimData interimData = punishmentManager.load(uuid, name, address);
+        InterimData interimData = PunishmentManager.getInstance().load(uuid, name, address);
 
-        Optional<Punishment> punishment = punishmentManager.getBan(interimData);
+        Optional<Punishment> punishment = PunishmentManager.getInstance().getBan(interimData);
 
         if (!punishment.isPresent()) {
-            punishmentManager.acceptData(interimData);
+            PunishmentManager.getInstance().acceptData(interimData);
             addresses.put(name, address);
             addresses.put(uuid, address);
         }
 
-        return punishment.map(pun -> AdvancedBan.this.getPunishmentManager().getLayoutBSN(pun));
+        return punishment.map(pun -> PunishmentManager.getInstance().getLayoutBSN(pun));
     }
 
     public void onLogin(AdvancedBanPlayer player) {
@@ -172,12 +236,12 @@ public abstract class AdvancedBan {
         players.remove(player.getUniqueId());
         players.remove(player.getName());
         players.remove(player.getAddress());
-        punishmentManager.discard(player);
+        PunishmentManager.getInstance().discard(player);
     }
 
     public boolean onChat(AdvancedBanPlayer player, String message) {
-        Optional<List<String>> layout = punishmentManager.getPunishment(player.getUniqueId(), PunishmentType.MUTE)
-                .map(pun -> AdvancedBan.this.getPunishmentManager().getLayout(pun));
+        Optional<List<String>> layout = PunishmentManager.getInstance().getPunishment(player.getUniqueId(), PunishmentType.MUTE)
+                .map(pun -> PunishmentManager.getInstance().getLayout(pun));
         if (layout.isPresent()) {
             layout.get().forEach(player::sendMessage);
             return true;
@@ -186,19 +250,13 @@ public abstract class AdvancedBan {
     }
 
     public boolean onCommand(AdvancedBanPlayer player, String command) {
-        Optional<List<String>> layout = punishmentManager.getPunishment(player.getUniqueId(), PunishmentType.MUTE)
-                .map(pun -> AdvancedBan.this.getPunishmentManager().getLayout(pun));
+        Optional<List<String>> layout = PunishmentManager.getInstance().getPunishment(player.getUniqueId(), PunishmentType.MUTE)
+                .map(pun -> PunishmentManager.getInstance().getLayout(pun));
         if (layout.isPresent() && isMutedCommand(command)) {
             layout.get().forEach(player::sendMessage);
             return true;
         }
         return false;
-    }
-
-    public boolean isAdvancedBanCommand(String command) {
-        command = command.split(" ")[0];
-
-        return commands.contains(command);
     }
 
     public boolean isMutedCommand(String command) {
@@ -210,11 +268,6 @@ public abstract class AdvancedBan {
             }
         }
         return false;
-    }
-
-    public final void registerCommand(AbstractCommand command) {
-        commands.add(command.getName());
-        onRegisterCommand(command);
     }
 
     public Optional<AdvancedBanPlayer> getPlayer(UUID uuid) {
@@ -249,7 +302,7 @@ public abstract class AdvancedBan {
     }
 
     public Collection<AdvancedBanPlayer> getOnlinePlayers() {
-        return Collections.unmodifiableList(new ArrayList<>(players.values()));
+        return Collections.unmodifiableList(new ArrayList<>(new HashSet<>(players.values())));
     }
 
     public Optional<InetAddress> getAddress(Object value) {
@@ -257,11 +310,11 @@ public abstract class AdvancedBan {
         return Optional.ofNullable(addresses.get(value));
     }
 
-    protected abstract void onRegisterCommand(AbstractCommand command);
-
     protected abstract void log(Level level, String msg);
 
     public abstract String getVersion();
+
+    public abstract void registerCommand(String commandName);
 
     public abstract void executeCommand(String command);
 

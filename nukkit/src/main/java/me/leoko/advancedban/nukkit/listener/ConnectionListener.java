@@ -9,6 +9,7 @@ import cn.nukkit.event.player.PlayerKickEvent;
 import cn.nukkit.event.player.PlayerQuitEvent;
 import lombok.RequiredArgsConstructor;
 import me.leoko.advancedban.AdvancedBan;
+import me.leoko.advancedban.AdvancedBanLogger;
 import me.leoko.advancedban.nukkit.NukkitAdvancedBanPlayer;
 
 import java.net.InetAddress;
@@ -27,7 +28,7 @@ public class ConnectionListener implements Listener {
         try {
             advancedBan.onPreLogin(event.getName(), event.getUuid(), InetAddress.getByName(event.getAddress())).ifPresent(reason -> banned.put(event.getUuid(), reason));
         } catch (UnknownHostException e) {
-            advancedBan.getLogger().warn("Error whilst resolving player's address");
+            AdvancedBanLogger.getInstance().warn("Error whilst resolving player's address");
         }
     }
 

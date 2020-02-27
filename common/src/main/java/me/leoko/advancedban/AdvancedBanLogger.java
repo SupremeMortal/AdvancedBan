@@ -1,6 +1,8 @@
 package me.leoko.advancedban;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,14 +18,13 @@ import java.util.logging.Logger;
 import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
-
-/**
- * @author SupremeMortal
- */
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AdvancedBanLogger {
+
+    @Getter
+    private static final AdvancedBanLogger instance = new AdvancedBanLogger();
+
     private static final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:*.gz");
-    private final AdvancedBan advancedBan;
     private Path logDirPath;
     private Path latestLogPath;
 
@@ -59,7 +60,7 @@ public class AdvancedBanLogger {
     }
 
     public void onEnable() {
-        this.logDirPath = advancedBan.getDataFolderPath().resolve("logs");
+        this.logDirPath = AdvancedBan.get().getDataFolderPath().resolve("logs");
         this.latestLogPath = logDirPath.resolve("latest.log");
 
         try {
@@ -76,7 +77,7 @@ public class AdvancedBanLogger {
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(logDirPath,
                 path -> Files.isRegularFile(path) && matcher.matches(path) &&
-                        Files.getLastModifiedTime(path).to(TimeUnit.DAYS) >= advancedBan.getConfiguration().getPurgeLogDays())) {
+                        Files.getLastModifiedTime(path).to(TimeUnit.DAYS) >= AdvancedBan.get().getConfiguration().getPurgeLogDays())) {
             for (Path path : stream) {
                 Files.delete(path);
             }
@@ -111,8 +112,8 @@ public class AdvancedBanLogger {
     }
 
     public void log(Level level, String msg) {
-        if (level.intValue() > Level.FINE.intValue() || advancedBan.getConfiguration().isDebug()) {
-            advancedBan.log(level, msg);
+        if (level.intValue() > Level.FINE.intValue() || AdvancedBan.get().getConfiguration().isDebug()) {
+            AdvancedBan.get().log(level, msg);
         }
         if (level.intValue() > Level.FINE.intValue()) {
             return;

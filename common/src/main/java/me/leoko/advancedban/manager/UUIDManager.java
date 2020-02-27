@@ -1,8 +1,12 @@
 package me.leoko.advancedban.manager;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import me.leoko.advancedban.AdvancedBan;
+import me.leoko.advancedban.AdvancedBanLogger;
 import me.leoko.advancedban.AdvancedBanPlayer;
+import me.leoko.advancedban.configuration.Configuration;
 
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -10,23 +14,26 @@ import java.net.URL;
 import java.util.*;
 import java.util.Map.Entry;
 
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UUIDManager {
-    private final AdvancedBan advancedBan;
+
+    @Getter
+    private static final UUIDManager instance = new UUIDManager();
+
     private FetcherMode mode;
     private final Map<String, UUID> activeUUIDs = new HashMap<>();
 
     public void onEnable() {
-        if (advancedBan.getConfiguration().getUuidFetcher().isDynamic()) {
-            if (!advancedBan.isOnlineMode()) {
+        if (AdvancedBan.get().getConfiguration().getUuidFetcher().isDynamic()) {
+            if (!AdvancedBan.get().isOnlineMode()) {
                 mode = FetcherMode.INTERNAL;
             } else {
-                mode = advancedBan.getMode();
+                mode = AdvancedBan.get().getMode();
             }
         }else{
-            if (!advancedBan.getConfiguration().getUuidFetcher().isEnabled()) {
+            if (!AdvancedBan.get().getConfiguration().getUuidFetcher().isEnabled()) {
                 mode = FetcherMode.DISABLED;
-            } else if (!advancedBan.getConfiguration().getUuidFetcher().isIntern()) {
+            } else if (!AdvancedBan.get().getConfiguration().getUuidFetcher().isIntern()) {
                 mode = FetcherMode.INTERNAL;
             }else{
                 mode = FetcherMode.RESTFUL;
@@ -43,29 +50,30 @@ public class UUIDManager {
         }
 
         if (mode == FetcherMode.INTERNAL || mode == FetcherMode.MIXED) {
-            uuid = advancedBan.getInternalUUID(name);
+            uuid = AdvancedBan.get().getInternalUUID(name);
         }
 
-        if (!uuid.isPresent() && advancedBan.isMojangAuthed()) {
-            String url = advancedBan.getConfiguration().getUuidFetcher().getRestApi().getUrl();
-            String key = advancedBan.getConfiguration().getUuidFetcher().getRestApi().getKey();
+        if (!uuid.isPresent() && AdvancedBan.get().isMojangAuthed()) {
+            final Configuration.UUIDApi restApi = AdvancedBan.get().getConfiguration().getUuidFetcher().getRestApi();
+            String url = restApi.getUrl();
+            String key = restApi.getKey();
             try {
                 uuid = Optional.ofNullable(askAPI(url, name, key));
             } catch (Exception e) {
-                advancedBan.getLogger().warn("Failed to retrieve UUID of " + name + " using REST-API");
-                advancedBan.getLogger().logException(e);
+                AdvancedBanLogger.getInstance().warn("Failed to retrieve UUID of " + name + " using REST-API");
+                AdvancedBanLogger.getInstance().logException(e);
             }
         }
 
-        if (!uuid.isPresent() && advancedBan.isMojangAuthed()) {
-            advancedBan.getLogger().debug("Trying to fetch UUID form BackUp-API...");
-            String url = advancedBan.getConfiguration().getUuidFetcher().getBackupApi().getUrl();
-            String key = advancedBan.getConfiguration().getUuidFetcher().getBackupApi().getKey();
+        if (!uuid.isPresent() && AdvancedBan.get().isMojangAuthed()) {
+            AdvancedBanLogger.getInstance().debug("Trying to fetch UUID form BackUp-API...");
+            String url = AdvancedBan.get().getConfiguration().getUuidFetcher().getBackupApi().getUrl();
+            String key = AdvancedBan.get().getConfiguration().getUuidFetcher().getBackupApi().getKey();
             try {
                 uuid = Optional.ofNullable(askAPI(url, name, key));
             } catch (Exception e) {
-                advancedBan.getLogger().severe("Failed to retrieve UUID of " + name + " using BACKUP REST-API");
-                advancedBan.getLogger().logException(e);
+                AdvancedBanLogger.getInstance().severe("Failed to retrieve UUID of " + name + " using BACKUP REST-API");
+                AdvancedBanLogger.getInstance().logException(e);
             }
         }
         return uuid;
@@ -85,7 +93,7 @@ public class UUIDManager {
         }
 
         if (mode == FetcherMode.INTERNAL || mode == FetcherMode.MIXED) {
-            Optional<String> name = advancedBan.getPlayer(uuid).map(AdvancedBanPlayer::getName);
+            Optional<String> name = AdvancedBan.get().getPlayer(uuid).map(AdvancedBanPlayer::getName);
             if (name.isPresent()) {
                 return name;
             }

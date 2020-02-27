@@ -1,8 +1,10 @@
 package me.leoko.advancedban.bungee.listener;
 
 import lombok.RequiredArgsConstructor;
+import me.leoko.advancedban.AdvancedBanLogger;
 import me.leoko.advancedban.AdvancedBanPlayer;
 import me.leoko.advancedban.bungee.BungeeAdvancedBan;
+import me.leoko.advancedban.manager.CommandManager;
 import me.leoko.advancedban.punishment.PunishmentType;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
@@ -27,7 +29,7 @@ public class MessageListener implements Listener {
         ProxiedPlayer proxiedPlayer = (ProxiedPlayer) event.getSender();
         Optional<AdvancedBanPlayer> player = advancedBan.getPlayer(proxiedPlayer.getUniqueId());
         if (!player.isPresent()) {
-            advancedBan.getLogger().severe("Player not registered within AdvancedBan");
+            AdvancedBanLogger.getInstance().severe("Player not registered within AdvancedBan");
             return;
         }
 
@@ -40,7 +42,7 @@ public class MessageListener implements Listener {
     @EventHandler
     public void onTabComplete(TabCompleteEvent event) {
         String cursor = event.getCursor().toLowerCase();
-        if (!advancedBan.isAdvancedBanCommand(cursor)) {
+        if (!CommandManager.getInstance().isAdvancedBanCommand(cursor)) {
             return;
         }
         if (event.getSender() instanceof ProxiedPlayer) { // Check if the player has permission for tab complete

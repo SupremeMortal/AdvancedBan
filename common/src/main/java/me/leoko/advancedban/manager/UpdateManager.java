@@ -1,7 +1,8 @@
 package me.leoko.advancedban.manager;
 
-import lombok.RequiredArgsConstructor;
+import lombok.experimental.UtilityClass;
 import me.leoko.advancedban.AdvancedBan;
+import me.leoko.advancedban.AdvancedBanLogger;
 import me.leoko.advancedban.utils.SQLQuery;
 
 import java.io.IOException;
@@ -11,14 +12,10 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Created by Leo on 07.08.2017.
- */
-@RequiredArgsConstructor
+@UtilityClass
 public class UpdateManager {
-    private final AdvancedBan advancedBan;
 
-    private static int startsWith(List<String> lines, String startsWith) {
+    private int startsWith(List<String> lines, String startsWith) {
         for (int i = 0; i < lines.size(); i++) {
             if (lines.get(i).startsWith(startsWith)) {
                 return i;
@@ -27,50 +24,69 @@ public class UpdateManager {
         return -1;
     }
 
-    public void onEnable() {
-        if (advancedBan.isUnitTesting()) return;
+    public boolean migrateFiles() {
+        if (AdvancedBan.get().isUnitTesting()) return false;
 
-        advancedBan.getDatabaseManager().executeStatement(SQLQuery.FIX_TABLE_PUNISHMENT);
-        advancedBan.getDatabaseManager().executeStatement(SQLQuery.FIX_TABLE_PUNISHMENT_HISTORY);
+        DatabaseManager.getInstance().executeStatement(SQLQuery.FIX_TABLE_PUNISHMENT);
+        DatabaseManager.getInstance().executeStatement(SQLQuery.FIX_TABLE_PUNISHMENT_HISTORY);
 
+        boolean checkUndoNotification = false;
         boolean checkMuteReason = false;
         boolean checkBanReason = false;
         boolean checkTempIpBan = false;
 
+        boolean anyChanges = false;
+
         try {
-            checkMuteReason = advancedBan.getMessages().getMessage("Check.MuteReason").isMissingNode();
+            checkUndoNotification = AdvancedBan.get().getMessages().getMessage("UnBan.Notification").isMissingNode();
         } catch (Exception e) {
             //ignore
         }
 
         try {
-            checkBanReason = advancedBan.getMessages().getMessage("Check.BanReason").isMissingNode();
+            checkMuteReason = AdvancedBan.get().getMessages().getMessage("Check.MuteReason").isMissingNode();
         } catch (Exception e) {
             //ignore
         }
 
         try {
-            checkTempIpBan = advancedBan.getMessages().getMessage("Tempipban").isMissingNode();
+            checkBanReason = AdvancedBan.get().getMessages().getMessage("Check.BanReason").isMissingNode();
         } catch (Exception e) {
             //ignore
         }
 
-        Path messagesPath = advancedBan.getDataFolderPath().resolve("Messages.yml");
+        try {
+            checkTempIpBan = AdvancedBan.get().getMessages().getMessage("Tempipban").isMissingNode();
+        } catch (Exception e) {
+            //ignore
+        }
+
+        Path messagesPath = AdvancedBan.get().getDataFolderPath().resolve("Messages.yml");
 
         try {
             List<String> lines = Files.readAllLines(messagesPath);
 
+            if(checkUndoNotification){
+                anyChanges = true;
+                lines.add(lines.indexOf("UnBan:") + 1, "  Notification: \"&e&o%OPERATOR% &7unbanned &c&o%NAME%\"");
+                lines.add(lines.indexOf("UnMute:") + 1, "  Notification: \"&e&o%OPERATOR% &7unmuted &c&o%NAME%\"");
+                lines.add(lines.indexOf("UnWarn:") + 1, "  Notification: \"&e&o%OPERATOR% &7unwarned &c&o%NAME%\"");
+            }
+
             if (checkMuteReason) {
+                anyChanges = true;
                 int index = lines.indexOf("Check:");
                 lines.add(index + 1, "  MuteReason: \"  &cReason &8\\xbb &7%REASON%\"");
             }
 
             if (checkBanReason) {
+                anyChanges = true;
                 int index = lines.indexOf("Check:");
                 lines.add(index + 1, "  BanReason: \"  &cReason &8\\xbb &7%REASON%\"");
             }
 
             if (checkTempIpBan) {
+                anyChanges = true;
                 List<String> tempIpBan = Arrays.asList(
                         "",
                         "Tempipban:",
@@ -98,14 +114,15 @@ public class UpdateManager {
                 lines.addAll(tempIpBan);
             }
 
-            Files.write(messagesPath, lines, StandardOpenOption.TRUNCATE_EXISTING);
+            if(checkBanReason || checkMuteReason || checkTempIpBan || checkUndoNotification)
+                Files.write(messagesPath, lines, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (Exception e) {
-            advancedBan.getLogger().warn("Unable to update Messages.yml. Check logs for more info");
-            advancedBan.getLogger().logException(e);
+            AdvancedBanLogger.getInstance().warn("Unable to update Messages.yml. Check logs for more info");
+            AdvancedBanLogger.getInstance().logException(e);
         }
 
         try {
-            Path configPath = advancedBan.getDataFolderPath().resolve("config.yml");
+            Path configPath = AdvancedBan.get().getDataFolderPath().resolve("config.yml");
             List<String> lines = Files.readAllLines(configPath);
             boolean change = false;
 
@@ -158,9 +175,13 @@ public class UpdateManager {
             if (change) {
                 Files.write(configPath, lines, StandardOpenOption.TRUNCATE_EXISTING);
             }
+
+            anyChanges = anyChanges || change;
         } catch (IOException e) {
-            advancedBan.getLogger().warn("Unable to update config.yml. Check logs for more info");
-            advancedBan.getLogger().logException(e);
+            AdvancedBanLogger.getInstance().warn("Unable to update config.yml. Check logs for more info");
+            AdvancedBanLogger.getInstance().logException(e);
         }
+
+        return anyChanges;
     }
 }

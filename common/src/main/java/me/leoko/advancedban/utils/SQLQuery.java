@@ -11,7 +11,7 @@ public enum SQLQuery {
             "CREATE TABLE IF NOT EXISTS `Punishments` ("+
             "`id` int NOT NULL AUTO_INCREMENT," +
             "`name` VARCHAR(16) NULL DEFAULT NULL," +
-                    "`uuid` VARCHAR(36) NULL DEFAULT NULL," +
+            "`uuid` VARCHAR(36) NULL DEFAULT NULL," +
             "`reason` VARCHAR(100) NULL DEFAULT NULL," +
             "`operator` VARCHAR(16) NULL DEFAULT NULL," +
             "`punishmentType` VARCHAR(16) NULL DEFAULT NULL," +
@@ -23,7 +23,7 @@ public enum SQLQuery {
             "CREATE TABLE IF NOT EXISTS Punishments (" +
             "id INTEGER IDENTITY PRIMARY KEY," +
             "name VARCHAR(16)," +
-                    "uuid VARCHAR(36)," +
+            "uuid VARCHAR(36)," +
             "reason VARCHAR(100)," +
             "operator VARCHAR(16)," +
             "punishmentType VARCHAR(16)," +
@@ -35,7 +35,7 @@ public enum SQLQuery {
             "CREATE TABLE IF NOT EXISTS `PunishmentHistory` (" +
             "`id` int NOT NULL AUTO_INCREMENT," +
             "`name` VARCHAR(16) NULL DEFAULT NULL," +
-                    "`uuid` VARCHAR(36) NULL DEFAULT NULL," +
+            "`uuid` VARCHAR(36) NULL DEFAULT NULL," +
             "`reason` VARCHAR(100) NULL DEFAULT NULL," +
             "`operator` VARCHAR(16) NULL DEFAULT NULL," +
             "`punishmentType` VARCHAR(16) NULL DEFAULT NULL," +
@@ -47,7 +47,7 @@ public enum SQLQuery {
             "CREATE TABLE IF NOT EXISTS PunishmentHistory (" +
             "id INTEGER IDENTITY PRIMARY KEY," +
             "name VARCHAR(16)," +
-                    "uuid VARCHAR(36)," +
+            "uuid VARCHAR(36)," +
             "reason VARCHAR(100)," +
             "operator VARCHAR(16)," +
             "punishmentType VARCHAR(16)," +
@@ -56,11 +56,11 @@ public enum SQLQuery {
             "calculation VARCHAR(50))"
     ),
     FIX_TABLE_PUNISHMENT(
-            "ALTER TABLE `Punishments` ALTER COLUMN `uuid` VARCHAR(36) NULL DEFAULT NULL",
+            "ALTER TABLE `Punishments` MODIFY `uuid` VARCHAR(36) NULL DEFAULT NULL",
             "ALTER TABLE Punishments ALTER COLUMN uuid VARCHAR(36)"
     ),
     FIX_TABLE_PUNISHMENT_HISTORY(
-            "ALTER TABLE `PunishmentHistory` ALTER COLUMN `uuid` VARCHAR(36) NULL DEFAULT NULL",
+            "ALTER TABLE `PunishmentHistory` MODIFY `uuid` VARCHAR(36) NULL DEFAULT NULL",
             "ALTER TABLE PunishmentHistory ALTER COLUMN uuid VARCHAR(36)"
     ),
     INSERT_PUNISHMENT(

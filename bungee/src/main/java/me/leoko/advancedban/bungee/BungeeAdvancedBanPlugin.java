@@ -2,6 +2,7 @@ package me.leoko.advancedban.bungee;
 
 import com.imaginarycode.minecraft.redisbungee.RedisBungee;
 import com.imaginarycode.minecraft.redisbungee.RedisBungeeAPI;
+import me.leoko.advancedban.AdvancedBanLogger;
 import me.leoko.advancedban.bungee.listener.ConnectionListener;
 import me.leoko.advancedban.bungee.listener.MessageListener;
 import me.leoko.advancedban.bungee.listener.PubSubMessageListener;
@@ -22,7 +23,7 @@ public class BungeeAdvancedBanPlugin extends Plugin {
             advancedBan.setRedisBungee(redisBungee);
             getProxy().getPluginManager().registerListener(this, new PubSubMessageListener(advancedBan));
             redisBungee.registerPubSubChannels("AdvancedBan", "AdvancedBanConnection");
-            advancedBan.getLogger().info("RedisBungee detected, hooking into it!");
+            AdvancedBanLogger.getInstance().info("RedisBungee detected, hooking into it!");
         }
     }
 

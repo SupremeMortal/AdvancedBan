@@ -4,6 +4,7 @@ import com.imaginarycode.minecraft.redisbungee.events.PubSubMessageEvent;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import lombok.RequiredArgsConstructor;
+import me.leoko.advancedban.AdvancedBanLogger;
 import me.leoko.advancedban.bungee.BungeeAdvancedBan;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -62,7 +63,7 @@ public class PubSubMessageListener implements Listener {
                         }
                         break;
                     default:
-                        advancedBan.getLogger().warn("Unknown pubsub message received!");
+                        AdvancedBanLogger.getInstance().warn("Unknown pubsub message received!");
                         break;
                 }
             } finally {
